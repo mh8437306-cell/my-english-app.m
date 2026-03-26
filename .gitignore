@@ -1,2 +1,133 @@
-# Google App Engine generated folder
-appengine-generated/
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>أكاديمية النجوم: المنهج الكامل 🏆</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        :root { --bg: #e0f7fa; --btn: #ff9800; }
+        body { margin: 0; font-family: 'Cairo', sans-serif; background-color: var(--bg); transition: 1s; text-align: center; }
+        
+        /* شاشة الدخول */
+        #login { position: fixed; inset: 0; background: white; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        /* لوحة التحكم */
+        .top-bar { position: fixed; top: 10px; width: 100%; display: flex; justify-content: space-around; z-index: 1000; }
+        .stat-box { background: white; padding: 10px 20px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 3px solid #ffca28; font-size: 18px; }
+
+        /* الأيقونات العائمة */
+        .floating-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; padding: 100px 20px 40px; }
+        .icon-btn { width: 120px; height: 120px; background: var(--btn); border-radius: 40% 60% 70% 30%; display: flex; align-items: center; justify-content: center; cursor: pointer; animation: float 3s ease-in-out infinite; color: white; font-weight: bold; border: 4px solid white; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+        /* الشهادة */
+        #certificate { display: none; background: white; border: 15px double gold; padding: 40px; margin: 20px auto; max-width: 600px; position: relative; }
+        .cert-title { font-size: 30px; color: #1a237e; }
+        
+        .section { display: none; background: white; margin: 20px auto; padding: 30px; border-radius: 30px; max-width: 700px; border: 6px dashed #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        button { cursor: pointer; padding: 12px 25px; border-radius: 25px; border: none; background: #4caf50; color: white; font-weight: bold; margin: 10px; }
+        #finalExamBtn { background: #d32f2f; display: none; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body id="mainBody">
+
+    <div id="login">
+        <h1>🌟 مرحباً بك في مدرسة الأبطال 🌟</h1>
+        <input type="text" id="playerName" placeholder="اكتب اسمك هنا" style="padding: 15px; border-radius: 10px; font-size: 20px; text-align: center;"><br>
+        <button onclick="startGame()">ابدأ تجميع النجوم! 🚀</button>
+    </div>
+
+    <div class="top-bar">
+        <div class="stat-box">⭐ النجوم: <span id="starCount">0</span> / 200</div>
+        <div class="stat-box">👤 البطل: <span id="pDisplay"></span></div>
+    </div>
+
+    <div class="floating-container">
+        <div class="icon-btn" onclick="showSection('vocab')">كلمات المنهج</div>
+        <div class="icon-btn" style="background:#4caf50" onclick="showSection('grammar')">قواعد اللغة</div>
+        <div class="icon-btn" style="background:#e91e63" id="finalExamBtn" onclick="showSection('exam')">🔥 الاختبار النهائي</div>
+    </div>
+
+    <!-- قسم الكلمات -->
+    <div id="vocab" class="section">
+        <h2>اضغط لتسمع وتتعلم (منهج رابعة أزهر) 🔊</h2>
+        <button onclick="learn('Oasis', 'واحة', 10)">Oasis 🔊</button>
+        <button onclick="learn('Nile', 'نهر النيل', 10)">Nile 🔊</button>
+        <button onclick="learn('Soil', 'تربة', 10)">Soil 🔊</button>
+        <button onclick="learn('Climate', 'مناخ', 10)">Climate 🔊</button>
+    </div>
+
+    <!-- قسم القواعد -->
+    <div id="grammar" class="section">
+        <h2>تحدي القواعد 📘</h2>
+        <p>I ______ (watch) a movie yesterday.</p>
+        <button onclick="ans('watched', 20)">watched</button>
+        <button onclick="ans('watch', 0)">watch</button>
+    </div>
+
+    <!-- الاختبار النهائي -->
+    <div id="exam" class="section">
+        <h2>📝 الاختبار النهائي للأبطال</h2>
+        <p>The Nile is the ______ river.</p>
+        <button onclick="finalAns('longest')">longest</button>
+        <button onclick="finalAns('long')">long</button>
+    </div>
+
+    <!-- الشهادة -->
+    <div id="certificate">
+        <h1 class="cert-title">📜 شهادة تقدير 📜</h1>
+        <p>نشهد أن البطل المتميز:</p>
+        <h2 id="certName" style="color: #d32f2f;"></h2>
+        <p>قد أتم منهج اللغة الإنجليزية للصف الرابع الابتدائي (الأزهر) بنجاح باهر وحصل على لقب:</p>
+        <h2 style="color: gold;">👑 ملك اللغة الإنجليزية 👑</h2>
+        <button onclick="window.print()">طباعة الشهادة 🖨️</button>
+    </div>
+
+    <script>
+        let stars = parseInt(localStorage.getItem('kStars')) || 0;
+        let pName = localStorage.getItem('kName') || "";
+
+        if(pName) startGame(true);
+
+        function startGame(auto=false) {
+            if(!auto) pName = document.getElementById('playerName').value || "بطل";
+            localStorage.setItem('kName', pName);
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('pDisplay').innerText = pName;
+            updateUI();
+        }
+
+        function learn(en, ar, pts) {
+            const m = new SpeechSynthesisUtterance(en); window.speechSynthesis.speak(m);
+            alert(en + " تعني " + ar);
+            stars += pts; updateUI();
+        }
+
+        function ans(a, pts) {
+            if(a === 'watched') { stars += pts; alert("ممتاز! +20 نجمة"); }
+            else alert("حاول ثانية!");
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('starCount').innerText = stars;
+            localStorage.setItem('kStars', stars);
+            if(stars >= 200) document.getElementById('finalExamBtn').style.display = 'flex';
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function finalAns(a) {
+            if(a === 'longest') {
+                document.querySelectorAll('.section, .floating-container, .top-bar').forEach(e => e.style.display = 'none');
+                document.getElementById('certificate').style.display = 'block';
+                document.getElementById('certName').innerText = pName;
+            }
+        }
+    </script>
+</body>
+</html>
